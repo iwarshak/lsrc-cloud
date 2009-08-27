@@ -1,0 +1,31 @@
+<div id="header" class="span-24 last">
+  <h2>Upload a new picture</h2> 
+  <hr />
+  <h4 class="alt">After uploading, it will take a few minutes for the picture to show up on the homepage</h4>
+  
+  <form action="https://<%=Picture::UPLOAD_BUCKET%>.s3.amazonaws.com/" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="key" value="uploads/<%=MD5.md5(Time.now.to_s + rand(100000).to_s).to_s %>">
+        <input type="hidden" name="AWSAccessKeyId" value="<%= ENV['AWS_ACCESS_KEY_ID'] %>"> 
+        <input type="hidden" name="acl" value="private"> 
+        <input type="hidden" name="success_action_redirect" value="<%= PictrConst::REDIRECT_URL %>">
+        <input type="hidden" name="policy" value="<%= @policy_document %>">
+        <input type="hidden" name="signature" value="<%= @signature %>">
+
+
+        File to upload to S3: 
+        <input name="file" type="file"> 
+        <br> 
+        <input type="submit" value="Upload File to S3"> 
+    </form>
+    
+    <br/>
+    <h4>
+      Queue size: <span id="queue-size"><%= Picture.queue_size %></span>
+      <%= link_to_remote " (clear)", :url => {:action => "purge_queue"}, :confirm => "Are you sure?" %>
+    </h4>
+    <h4>
+      DB size: <span id="db-size"><%= Picture.db_size %></span>
+      <%= link_to_remote " (clear)", :url => {:action => "purge_db"}, :confirm => "Are you sure?" %>
+    </h4>
+    <h4>S3 size: <%= Picture.s3_size %></h4>
+</div>

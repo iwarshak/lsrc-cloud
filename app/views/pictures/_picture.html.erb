@@ -1,0 +1,4 @@
+<% picture.processed_cloud_front_urls.each do |url| %>  
+  <%= image_tag url %>
+<% end%>
+<%= link_to " delete", {:action => "destroy", :id => picture.id}, :method => :post %>

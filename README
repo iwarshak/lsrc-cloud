@@ -1,0 +1,33 @@
+This is a demonstration app for my Lonestar Ruby Conf talk "Rails in the Cloud"
+
+It is a simple photo processing app that runs on Amazon EC2, S3, SimpleDB, Cloudfront, and SQS
+
+Pictures are uploaded directly from the browser to S3. S3 returns a redirect, which 
+hits the webserver and generates a database entry in SimpleDB as well as jobs which 
+go into the SQS queue.
+
+Each job is a picture conversion. We are using ImageMagick to apply different transformations
+to it: resizing, effects, text adding, etc. 
+
+A separate processing daemon pulls jobs from SQS, downloads the uploaded image, performs the 
+transformation, updates the database and uploads the new images to S3. There is also a Cloudfront
+distribution setup to mirror the S3 bucket, so images are served from the Cloudfront CDN. 
+
+To get the app bootstrapped, there are a few things you have to do.
+
+# Simple DB - Setup the Picture domain
+RightAws::ActiveSdb.establish_connection
+Picture.create_domain
+
+# Create the S3 Bucket
+s3 =  RightAws::S3.new
+processed_bucket = s3.bucket('pictr', true)
+
+# Cloudfront distribution
+acf = RightAws::AcfInterface.new
+dist = acf.create_distribution 'pictr.s3.amazonaws.com', 'lsrc ruby demo'
+
+Let me know if you have any questions: iwarshak@stripey.net or twitter.com/iwarshak
+
+
+

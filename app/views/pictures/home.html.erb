@@ -1,0 +1,23 @@
+<h4><%= link_to "Upload a picture", :action => "upload"%></h4>
+<% @pictures.each do |picture| %>
+  <% picture.reload %>
+  
+  <% if picture.done_processing?%>
+    <%= render :partial => "picture", :object => picture %>
+  <% else %>
+    <% sane_picture_id = MD5.md5(picture.id).to_s %>
+    <div id="<%= sane_picture_id %>">
+      <script type="text/javascript" charset="utf-8">
+        check_<%= sane_picture_id %>=true;
+      </script>  
+    </div>
+    <%= periodically_call_remote(
+              :condition => "check_#{sane_picture_id}",
+              :url => {:action => 'check_for_updates', :id => picture.id, :sane_picture_id => sane_picture_id }, 
+              :frequency => '10'
+        )
+    %>
+  <% end %>
+  <hr />
+<% end %>
+
